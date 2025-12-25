@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, Literal
 
 SupportedLanguage = Literal[
-    'javascript', 'typescript', 'python', 'java', 'cpp', 'csharp', 'go', 'rust'
+    'javascript', 'typescript', 'python'
 ]
 
 class SessionState(BaseModel):

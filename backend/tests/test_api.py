@@ -10,7 +10,7 @@ def teardown_function():
     _store.clear()
 
 def test_health_check():
-    response = client.get("/")
+    response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "message": "Live Code Studio Backend Running"}
 
@@ -45,6 +45,8 @@ def test_execution_python():
     })
     assert response.status_code == 200
     data = response.json()
+    if not data["success"]:
+        print(f"\nExecution failed: {data.get('error')}")
     assert data["success"] is True
     assert "Hello Test" in data["output"]
 
@@ -61,10 +63,7 @@ def test_execute_invalid_input():
 def test_execution_unsupported():
     response = client.post("/execute", json={
         "code": "fn main() {}",
-        "language": "rust" # Valid language, but compiler likely missing
+        "language": "rust" # Now invalid in schema
     })
-    # Should be 200 OK (request valid), but execution fails
-    assert response.status_code == 200
-    data = response.json()
-    assert data["success"] is False
-    assert len(data["error"]) > 0 # Error message should exist
+    # Should be 422 Unprocessable Entity due to Pydantic validation
+    assert response.status_code == 422

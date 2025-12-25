@@ -90,11 +90,11 @@ sys.stderr = io.StringIO()
       }
     }
 
-    // Other languages: Stub
+    // Fallback for unexpected inputs
     return {
       success: false,
       output: '',
-      error: `Browser execution for ${language} is not supported. Only JavaScript and Python (WASM) are supported in this mode.`,
+      error: `Unsupported language: ${language}`,
       executionTime: 0
     };
 

@@ -13,11 +13,6 @@ const monacoLanguageMap: Record<SupportedLanguage, string> = {
   javascript: 'javascript',
   typescript: 'typescript',
   python: 'python',
-  java: 'java',
-  cpp: 'cpp',
-  csharp: 'csharp',
-  go: 'go',
-  rust: 'rust',
 };
 
 const CodeEditor = memo(({ code, language, onChange, readOnly = false }: CodeEditorProps) => {
