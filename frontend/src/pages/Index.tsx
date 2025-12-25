@@ -27,7 +27,7 @@ const Index = () => {
       <div className="min-h-screen bg-background overflow-hidden">
         {/* Grid background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.3)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.3)_1px,transparent_1px)] bg-[size:64px_64px]" />
-        
+
         {/* Gradient orbs */}
         <div className="absolute top-0 -left-40 w-80 h-80 bg-primary/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-[120px]" />
@@ -41,6 +41,9 @@ const Index = () => {
               </div>
               <span className="font-bold text-xl">CodeInterview</span>
             </div>
+            <Button variant="ghost" onClick={() => navigate('/login')}>
+              Log in
+            </Button>
           </header>
 
           {/* Hero Section */}
@@ -148,18 +151,18 @@ const Index = () => {
   );
 };
 
-const FeatureCard = ({ 
-  icon, 
-  title, 
-  description, 
-  delay 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
+const FeatureCard = ({
+  icon,
+  title,
+  description,
+  delay
+}: {
+  icon: React.ReactNode;
+  title: string;
   description: string;
   delay: string;
 }) => (
-  <div 
+  <div
     className="glass rounded-xl p-6 space-y-4 hover:border-primary/30 transition-colors animate-fade-in"
     style={{ animationDelay: delay }}
   >

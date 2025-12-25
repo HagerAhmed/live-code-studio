@@ -68,8 +68,8 @@ export const useInterviewSession = (sessionId: string) => {
   const updateCode = useCallback((newCode: string) => {
     const session = sessionStore.get(sessionId);
     if (session) {
-      session.code = newCode;
-      sessionStore.set(sessionId, session);
+      const updatedSession = { ...session, code: newCode };
+      sessionStore.set(sessionId, updatedSession);
       notifyListeners(sessionId);
     }
   }, [sessionId]);
@@ -77,9 +77,12 @@ export const useInterviewSession = (sessionId: string) => {
   const updateLanguage = useCallback((newLanguage: SupportedLanguage) => {
     const session = sessionStore.get(sessionId);
     if (session) {
-      session.language = newLanguage;
-      session.code = DEFAULT_CODE[newLanguage];
-      sessionStore.set(sessionId, session);
+      const updatedSession = {
+        ...session,
+        language: newLanguage,
+        code: DEFAULT_CODE[newLanguage]
+      };
+      sessionStore.set(sessionId, updatedSession);
       notifyListeners(sessionId);
     }
   }, [sessionId]);
