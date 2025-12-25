@@ -33,3 +33,9 @@ frontend/.env.*.local
 
 # UV
 .uv/
+
+# Databases
+*.db
+*.db-journal
+backend/sql_app.db
+backend/test.db

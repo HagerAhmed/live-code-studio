@@ -7,21 +7,42 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Code2, ArrowRight } from "lucide-react";
 
+import { useAuth } from "../contexts/AuthContext";
+import { toast } from "sonner";
+
 const Login = () => {
     const navigate = useNavigate();
+    const { login: authLogin } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            const response = await fetch("http://localhost:8000/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                await authLogin(data.access_token);
+                toast.success("Welcome back!");
+                navigate("/");
+            } else {
+                const errorData = await response.json();
+                toast.error(errorData.detail || "Login failed");
+            }
+        } catch (error) {
+            toast.error("Network error. Is the backend running?");
+            console.error("Login error:", error);
+        } finally {
             setIsLoading(false);
-            navigate("/");
-        }, 1000);
+        }
     };
 
     return (

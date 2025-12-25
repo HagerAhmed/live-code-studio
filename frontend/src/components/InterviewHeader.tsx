@@ -14,6 +14,8 @@ interface InterviewHeaderProps {
   connectedUsers: number;
 }
 
+import { useAuth } from '../contexts/AuthContext';
+
 const InterviewHeader = ({
   sessionId,
   language,
@@ -23,6 +25,7 @@ const InterviewHeader = ({
   connectedUsers,
 }: InterviewHeaderProps) => {
   const [copied, setCopied] = useState(false);
+  const { user } = useAuth();
 
   const copyLink = async () => {
     const url = `${window.location.origin}/interview/${sessionId}`;
@@ -39,7 +42,14 @@ const InterviewHeader = ({
           <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
             <span className="text-primary font-bold text-sm">&lt;/&gt;</span>
           </div>
-          <span className="font-semibold text-lg">CodeInterview</span>
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm leading-tight">CodeInterview</span>
+            {user && (
+              <span className="text-[10px] text-muted-foreground leading-tight">
+                {user.full_name}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="h-6 w-px bg-border" />

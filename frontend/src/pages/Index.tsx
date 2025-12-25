@@ -4,9 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
 import { Code2, Users, Zap, Play, ArrowRight, Sparkles } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { useAuth } from '../contexts/AuthContext';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [isCreating, setIsCreating] = useState(false);
 
   const createSession = () => {
@@ -41,9 +43,22 @@ const Index = () => {
               </div>
               <span className="font-bold text-xl">CodeInterview</span>
             </div>
-            <Button variant="ghost" onClick={() => navigate('/login')}>
-              Log in
-            </Button>
+            <div className="flex items-center gap-4">
+              {user ? (
+                <>
+                  <span className="text-sm text-muted-foreground">
+                    Welcome, <span className="text-foreground font-medium">{user.full_name}</span>
+                  </span>
+                  <Button variant="ghost" size="sm" onClick={logout}>
+                    Log out
+                  </Button>
+                </>
+              ) : (
+                <Button variant="ghost" onClick={() => navigate('/login')}>
+                  Log in
+                </Button>
+              )}
+            </div>
           </header>
 
           {/* Hero Section */}

@@ -26,6 +26,14 @@ class DBSession(Base):
     language = Column(String, default="javascript")
     connected_users = Column(Integer, default=0)
 
+class DBUser(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    full_name = Column(String)
+    hashed_password = Column(String)
+
 # Create tables
 Base.metadata.create_all(bind=engine)
 

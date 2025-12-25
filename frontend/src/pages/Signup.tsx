@@ -16,7 +16,7 @@ const Signup = () => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSignup = (e: React.FormEvent) => {
+    const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (password !== confirmPassword) {
@@ -26,12 +26,29 @@ const Signup = () => {
 
         setIsLoading(true);
 
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            const response = await fetch("http://localhost:8000/auth/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email,
+                    full_name: fullName,
+                    password
+                }),
+            });
+
+            if (response.ok) {
+                toast.success("Account created successfully! Please log in.");
+                navigate("/login");
+            } else {
+                const errorData = await response.json();
+                toast.error(errorData.detail || "Signup failed");
+            }
+        } catch (error) {
+            toast.error("Network error. Is the backend running?");
+        } finally {
             setIsLoading(false);
-            toast.success("Account created successfully!");
-            navigate("/login");
-        }, 1000);
+        }
     };
 
     return (
