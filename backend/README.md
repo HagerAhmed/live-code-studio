@@ -1,55 +1,26 @@
 # Live Code Studio - Backend
 
-This is the backend API for Live Code Studio, built with **Python 3.12+** and **FastAPI**. It handles session management for collaborative coding and executing code snippets.
+This is the backend API for Live Code Studio, built with **Python 3.12+** and **FastAPI**.
 
-## Features
+## Core Responsibilities
 
-*   **REST API**: Endpoints for session retrieval and updates.
-*   **Code Execution**: Supports running Python and JavaScript (Node.js) code.
-*   **Typed Validation**: Uses Pydantic models for request/response validation.
+1.  **Session Management**: Syncs code state between users.
+2.  **Static Serving**: Serves the compiled Frontend React app in production.
+3.  **Execution (Legacy/Fallback)**: Minimal `subprocess` support for script languages (mostly handled by Frontend/WASM now).
 
 ## Prerequisites
 
-*   **Python**: Version 3.12 or higher.
-*   **uv**: A fast Python package manager. Install it via `pip install uv` or see [uv docs](https://docs.astral.sh/uv/).
-*   **Node.js**: Required for JavaScript/TypeScript.
-*   **Compilers/Runtimes** (for polyglot support):
-    *   **Java**: JDK (javac, java)
-    *   **C++**: G++ (MinGW on Windows)
-    *   **C#**: .NET SDK (dotnet)
-    *   **Go**: Go Runtime (go)
-    *   **Rust**: Rust Toolchain (rustc)
-    *   **TypeScript**: `ts-node` (install via `npm install -g ts-node typescript`)
+*   **Python**: 3.12+
+*   **uv**: Package manager (`pip install uv`)
 
-## Installation
-
-1.  Navigate to the backend directory:
-    ```bash
-    cd backend
-    ```
-
-2.  Install dependencies (automatically creates a virtual environment):
-    ```bash
-    uv sync
-    ```
-
-## Running the Server
-
-Start the server from the **root directory** of the repository (parent of `backend/`):
+## Running Locally
 
 ```bash
-# From /path/live-code-studio
+# From project root
 uv run uvicorn backend.main:app --reload --port 8000
 ```
 
-The API will be available at [http://localhost:8000](http://localhost:8000).
-Interactive API documentation is available at [http://localhost:8000/docs](http://localhost:8000/docs).
-
 ## Running Tests
-
-Integration tests are located in `tests/` and use `pytest`.
-
-To run all tests:
 
 ```bash
 uv run pytest
@@ -57,12 +28,6 @@ uv run pytest
 
 ## API Endpoints
 
-*   `GET /sessions/{session_id}`: Get session state.
-*   `POST /sessions/{session_id}`: Update session state (code/language).
-*   `POST /execute`: Execute code.
-
-## Development
-
-*   **Framework**: FastAPI
-*   **Testing**: Pytest + TestClient
-*   **Dependency Management**: uv
+*   `GET /health`: Health check (and production root `/` serves Frontend).
+*   `GET/POST /sessions/{id}`: Session state management.
+*   `POST /execute`: (Legacy) Backend execution endpoint.

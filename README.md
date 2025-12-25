@@ -2,36 +2,48 @@
 
 A real-time collaborative coding interview platform.
 
-## Quick Start
+## Features
 
-1.  **Install Root Dependencies**:
+*   **Real-time Collaboration**: Shared interview session state.
+*   **WebAssembly Execution**: Secure client-side execution for **Python** (via Pyodide).
+*   **Browser-Based Execution**: Secure execution for **JavaScript** and **TypeScript**.
+*   **Simplified Stack**: No complex backend compilers required.
+*   **Dockerized**: Single container for both Frontend (Static) and Backend (API).
+
+## Supported Languages
+
+*   JavaScript
+*   TypeScript
+*   Python (WASM)
+
+## Quick Start (Local)
+
+1.  **Run with Docker (Recommended)**:
     ```bash
-    npm install
+    docker build -t live-code-studio .
+    docker run -p 8000:8000 live-code-studio
     ```
+    Open [http://localhost:8000](http://localhost:8000).
 
-2.  **Setup Backend**:
-    ```bash
-    cd backend
-    uv sync
-    cd ..
-    ```
-
-3.  **Setup Frontend**:
-    ```bash
-    cd frontend
-    npm install
-    cd ..
-    ```
-
-4.  **Run Full Stack**:
+2.  **Run Manually (Dev Mode)**:
     ```bash
     npm run dev
     ```
-    This will start:
-    *   Backend API at `http://localhost:8000`
-    *   Frontend App at `http://localhost:5173` (or similar)
+    *   Backend at `http://localhost:8000`
+    *   Frontend at `http://localhost:8080`
 
-## Structure
+## Deployment (Render)
 
-*   `backend/`: FastAPI application (Python)
-*   `frontend/`: React + Vite application (TypeScript)
+This project is configured for one-click deployment on [Render](https://render.com).
+
+1.  **Push to GitHub**.
+2.  **Create Blueprint** in Render dashboard.
+3.  Connect your repository.
+4.  Render will auto-detect `render.yaml` and deploy.
+
+## Project Structure
+
+*   `frontend/`: React + Vite + Monaco Editor (TypeScript).
+*   `backend/`: FastAPI (Python) for session sync.
+*   `Dockerfile`: Multi-stage build for production.
+*   `render.yaml`: Render deployment configuration.
