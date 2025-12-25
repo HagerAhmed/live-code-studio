@@ -48,6 +48,16 @@ def test_execution_python():
     assert data["success"] is True
     assert "Hello Test" in data["output"]
 
+def test_execute_invalid_input():
+    # Missing 'language' field
+    response = client.post("/execute", json={
+        "code": "print('fail')",
+    })
+    assert response.status_code == 422
+    data = response.json()
+    assert data["detail"][0]["type"] == "missing"
+    assert data["detail"][0]["loc"] == ["body", "language"]
+
 def test_execution_unsupported():
     response = client.post("/execute", json={
         "code": "some code",
