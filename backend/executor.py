@@ -2,8 +2,9 @@ import subprocess
 import tempfile
 import os
 import uuid
+import time
 from pathlib import Path
-from models import ExecutionResult
+from .models import ExecutionResult
 
 def run_command(command, error_msg="Error detected", timeout=5):
     try:
@@ -19,8 +20,6 @@ def run_command(command, error_msg="Error detected", timeout=5):
         raise TimeoutError("Execution timed out (5s limit)")
 
 def execute_code(code: str, language: str) -> ExecutionResult:
-    start_time = os.times().elapsed # Using safer time check if possible, or just time.time in logic
-    import time
     start_time = time.time()
     
     # Create a unique temporary directory for this execution
