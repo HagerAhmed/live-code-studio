@@ -6,33 +6,43 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Code2, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 
-const Login = () => {
+const Signup = () => {
     const navigate = useNavigate();
+    const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleSignup = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (password !== confirmPassword) {
+            toast.error("Passwords do not match!");
+            return;
+        }
+
         setIsLoading(true);
 
         // Simulate API call
         setTimeout(() => {
             setIsLoading(false);
-            navigate("/");
+            toast.success("Account created successfully!");
+            navigate("/login");
         }, 1000);
     };
 
     return (
         <>
             <Helmet>
-                <title>Login | CodeInterview</title>
-                <meta name="description" content="Login to CodeInterview to start your collaborative coding sessions." />
+                <title>Sign Up | CodeInterview</title>
+                <meta name="description" content="Create an account to start your collaborative coding journey." />
             </Helmet>
 
             <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
-                {/* Background elements */}
+                {/* Background elements (Same as Login) */}
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.3)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.3)_1px,transparent_1px)] bg-[size:64px_64px]" />
                 <div className="absolute top-0 -left-40 w-80 h-80 bg-primary/20 rounded-full blur-[120px]" />
                 <div className="absolute bottom-0 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-[120px]" />
@@ -49,13 +59,25 @@ const Login = () => {
 
                     <Card className="glass border-primary/20 shadow-2xl">
                         <CardHeader>
-                            <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
+                            <CardTitle className="text-2xl text-center">Create an account</CardTitle>
                             <CardDescription className="text-center">
-                                Enter your credentials to access your account
+                                Join us to start coding collaboratively
                             </CardDescription>
                         </CardHeader>
-                        <form onSubmit={handleLogin}>
+                        <form onSubmit={handleSignup}>
                             <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="fullName">Full Name</Label>
+                                    <Input
+                                        id="fullName"
+                                        type="text"
+                                        placeholder="John Doe"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        required
+                                        className="bg-background/50"
+                                    />
+                                </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
                                     <Input
@@ -69,17 +91,23 @@ const Login = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Label htmlFor="password">Password</Label>
-                                        <a href="#" className="text-sm text-primary hover:underline">
-                                            Forgot password?
-                                        </a>
-                                    </div>
+                                    <Label htmlFor="password">Password</Label>
                                     <Input
                                         id="password"
                                         type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        className="bg-background/50"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                    <Input
+                                        id="confirmPassword"
+                                        type="password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
                                         required
                                         className="bg-background/50"
                                     />
@@ -95,11 +123,11 @@ const Login = () => {
                                     {isLoading ? (
                                         <>
                                             <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
-                                            Signing in...
+                                            Creating account...
                                         </>
                                     ) : (
                                         <>
-                                            Sign in
+                                            Sign Up
                                             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                         </>
                                     )}
@@ -109,9 +137,9 @@ const Login = () => {
                     </Card>
 
                     <div className="text-center mt-6 text-sm text-muted-foreground">
-                        Don't have an account?{" "}
-                        <a href="/signup" className="text-primary hover:underline font-medium">
-                            Sign up
+                        Already have an account?{" "}
+                        <a href="/login" className="text-primary hover:underline font-medium">
+                            Sign in
                         </a>
                     </div>
                 </div>
@@ -120,4 +148,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Signup;
