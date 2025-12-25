@@ -1,63 +1,55 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from .models import SessionState, ExecutionRequest, ExecutionResult, SupportedLanguage
+from .models import SessionState, ExecutionRequest, ExecutionResult
 from .executor import execute_code
+from .database import db
 
 app = FastAPI(title="Live Code Studio API", version="1.0.0")
 
-# Setup CORS to allow frontend to connect
+# Setup CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174"], # Vite defaults
+    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# In-memory session store (Mock database)
-sessions = {}
-
-# Default code templates matching frontend
+# Default code templates
 DEFAULT_CODE = {
   'javascript': "// Welcome to your coding interview!\n// Write your solution below\n\nfunction solution(input) {\n  // Your code here\n  return input;\n}\n\n// Test your solution\nconsole.log(solution(\"Hello, World!\"));\n",
   'python': "# Welcome to your coding interview!\n# Write your solution below\n\ndef solution(input):\n    # Your code here\n    return input\n\n# Test your solution\nprint(solution(\"Hello, World!\"))\n",
-  # Add others as needed or rely on frontend to send initial
 }
 
 @app.get("/sessions/{session_id}", response_model=SessionState)
 def get_session(session_id: str):
-    if session_id not in sessions:
-        # Create default session if it doesn't exist (auto-create logic matching frontend)
-        sessions[session_id] = SessionState(
-            code=DEFAULT_CODE.get('javascript', ''),
-            language='javascript',
-            connectedUsers=1
+    session = db.get_session(session_id)
+    if not session:
+        # Auto-create for demo purposes, matching frontend expectation
+        session = db.create_session(
+            session_id, 
+            default_code=DEFAULT_CODE.get('javascript', ''),
+            language='javascript'
         )
-    return sessions[session_id]
+    return session
 
 @app.post("/sessions/{session_id}", response_model=SessionState)
 def update_session(session_id: str, update: dict):
-    # Note: 'update' body schema should ideally be partial session state
-    # For now, we'll just accept relevant fields manualy
-    if session_id not in sessions:
-         sessions[session_id] = SessionState(
-            code=DEFAULT_CODE.get('javascript', ''),
-            language='javascript',
-            connectedUsers=0
-        )
+    # Try to update existing session
+    session = db.update_session(
+        session_id, 
+        code=update.get('code'), 
+        language=update.get('language')
+    )
     
-    current = sessions[session_id]
-    
-    if 'code' in update:
-        current.code = update['code']
-    if 'language' in update:
-        current.language = update['language']
-        # Reset code on language switch? 
-        # Frontend does it, backend should probably just trust the payload or handle logic.
-        # Here we just trust the payload.
-    
-    sessions[session_id] = current
-    return current
+    # If not found, create it (upsert behavior)
+    if not session:
+        # Determine language to set default code/language
+        lang = update.get('language', 'javascript')
+        code = update.get('code', DEFAULT_CODE.get(lang, ''))
+        session = db.create_session(session_id, default_code=code, language=lang)
+        
+    return session
 
 @app.post("/execute", response_model=ExecutionResult)
 def execute_endpoint(request: ExecutionRequest):
