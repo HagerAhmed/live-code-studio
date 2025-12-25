@@ -62,12 +62,11 @@ def update_session(session_id: str, update: dict):
 def execute_endpoint(request: ExecutionRequest):
     return execute_code(request.code, request.language)
 
-@app.get("/")
+@app.get("/health")
 def health_check():
     return {"status": "ok", "message": "Live Code Studio Backend Running"}
 
 # Serve React App (Static Files)
-# This requires the "frontend/dist" to be copied to "/app/static" in Docker
 import os
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -78,10 +77,15 @@ if os.path.exists("/app/static"):
     
     # Catch-all for SPA client-side routing
     @app.get("/{full_path:path}")
-    async def serve_spa(full_path: str):
-        # Allow API calls to pass through (already handled by routes above, but good safety)
-        if full_path.startswith("api/") or full_path.startswith("sessions/") or full_path == "execute":
+    async def serve_spa(full_path: str = ""):
+        # Allow API calls to pass through
+        if full_path.startswith("api/") or full_path.startswith("sessions/") or full_path == "execute" or full_path == "health":
             return {"error": "Not Found"}
             
-        # Serve index.html for any other route
+        # Serve index.html for root and any other SPA route
         return FileResponse("/app/static/index.html")
+else:
+    # Local development feedback
+    @app.get("/")
+    def root():
+        return {"message": "Backend is running. In production, this serves the React app."}
