@@ -1,0 +1,150 @@
+openapi: 3.0.0
+info:
+  title: Live Code Studio API
+  description: Backend API for Live Code Studio, supporting collaborative coding interviews.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Local Development Server
+
+paths:
+  /sessions/{sessionId}:
+    get:
+      summary: Get session state
+      description: Retrieves the current state of a coding interview session.
+      operationId: getSession
+      parameters:
+        - in: path
+          name: sessionId
+          schema:
+            type: string
+          required: true
+          description: Unique identifier of the session
+      responses:
+        '200':
+          description: Session state retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionState'
+        '404':
+          description: Session not found
+
+    post:
+      summary: Update session state
+      description: Updates the code or language of a session. Used for synchronization.
+      operationId: updateSession
+      parameters:
+        - in: path
+          name: sessionId
+          schema:
+            type: string
+          required: true
+          description: Unique identifier of the session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                language:
+                  $ref: '#/components/schemas/SupportedLanguage'
+      responses:
+        '200':
+          description: Session updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionState'
+        '404':
+          description: Session not found
+
+  /execute:
+    post:
+      summary: Execute code
+      description: Executes code in a specified language and returns the output.
+      operationId: executeCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecutionRequest'
+      responses:
+        '200':
+          description: Code execution completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionResult'
+        '400':
+          description: Invalid request
+        '500':
+          description: Server error during execution
+
+components:
+  schemas:
+    SupportedLanguage:
+      type: string
+      enum:
+        - javascript
+        - typescript
+        - python
+        - java
+        - cpp
+        - csharp
+        - go
+        - rust
+      description: Supported programming languages for execution.
+
+    SessionState:
+      type: object
+      required:
+        - code
+        - language
+        - connectedUsers
+      properties:
+        code:
+          type: string
+          description: The current code in the editor.
+        language:
+          $ref: '#/components/schemas/SupportedLanguage'
+        connectedUsers:
+          type: integer
+          description: Number of users currently connected to the session.
+          minimum: 0
+    
+    ExecutionRequest:
+      type: object
+      required:
+        - code
+        - language
+      properties:
+        code:
+          type: string
+          description: The source code to execute.
+        language:
+          $ref: '#/components/schemas/SupportedLanguage'
+
+    ExecutionResult:
+      type: object
+      required:
+        - success
+        - output
+        - executionTime
+      properties:
+        success:
+          type: boolean
+          description: Whether the execution completed successfully (no runtime/compilation errors).
+        output:
+          type: string
+          description: Standard output and standard error combined.
+        error:
+          type: string
+          description: Error message if execution failed or crashed.
+        executionTime:
+          type: number
+          description: Execution time in milliseconds.
