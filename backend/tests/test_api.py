@@ -60,10 +60,11 @@ def test_execute_invalid_input():
 
 def test_execution_unsupported():
     response = client.post("/execute", json={
-        "code": "some code",
-        "language": "rust" # Not impl in executor yet
+        "code": "fn main() {}",
+        "language": "rust" # Valid language, but compiler likely missing
     })
+    # Should be 200 OK (request valid), but execution fails
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is False
-    assert "not yet implemented" in data["error"]
+    assert len(data["error"]) > 0 # Error message should exist

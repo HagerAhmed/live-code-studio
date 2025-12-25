@@ -65,3 +65,23 @@ def execute_endpoint(request: ExecutionRequest):
 @app.get("/")
 def health_check():
     return {"status": "ok", "message": "Live Code Studio Backend Running"}
+
+# Serve React App (Static Files)
+# This requires the "frontend/dist" to be copied to "/app/static" in Docker
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+# Check if running in Docker where /app/static exists
+if os.path.exists("/app/static"):
+    app.mount("/assets", StaticFiles(directory="/app/static/assets"), name="assets")
+    
+    # Catch-all for SPA client-side routing
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        # Allow API calls to pass through (already handled by routes above, but good safety)
+        if full_path.startswith("api/") or full_path.startswith("sessions/") or full_path == "execute":
+            return {"error": "Not Found"}
+            
+        # Serve index.html for any other route
+        return FileResponse("/app/static/index.html")
