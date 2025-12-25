@@ -18,6 +18,7 @@ WORKDIR /app
 # For now keeping it slim as requested for Python/Node logic
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv
