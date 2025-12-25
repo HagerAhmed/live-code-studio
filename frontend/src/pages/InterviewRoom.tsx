@@ -31,13 +31,22 @@ const InterviewRoom = () => {
     return <Navigate to="/" replace />;
   }
 
+  // Show generic loading or error overlay if strictly needed, 
+  // but for now let's just show a toaster or banner if disconnected.
+  // Actually, useInterviewSession returns `isConnected`.
+
+  // Identify if we really are disconnected (fetch failed) vs just loading
+  // The hook abstracts this into `isConnected`. 
+  // Let's add an visual indicator in the UI via the Header or a banner.
+
+
   return (
     <>
       <Helmet>
         <title>Interview Session | CodeInterview</title>
         <meta name="description" content="Collaborative coding interview session with real-time code editing and execution." />
       </Helmet>
-      
+
       <div className="h-screen flex flex-col bg-background">
         <InterviewHeader
           sessionId={sessionId}

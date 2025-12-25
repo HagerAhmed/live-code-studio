@@ -41,19 +41,19 @@ const InterviewHeader = ({
           </div>
           <span className="font-semibold text-lg">CodeInterview</span>
         </div>
-        
+
         <div className="h-6 w-px bg-border" />
-        
+
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Users className="w-4 h-4" />
           <span>{connectedUsers} connected</span>
-          <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+          <span className={`w-2 h-2 rounded-full animate-pulse ${connectedUsers > 0 ? 'bg-success' : 'bg-destructive'}`} />
         </div>
       </div>
 
       <div className="flex items-center gap-3">
         <LanguageSelector language={language} onChange={onLanguageChange} />
-        
+
         <Button
           variant="outline"
           size="sm"
@@ -72,12 +72,12 @@ const InterviewHeader = ({
             </>
           )}
         </Button>
-        
+
         <Button
           variant="success"
           size="sm"
           onClick={onRunCode}
-          disabled={isExecuting || (language !== 'javascript' && language !== 'typescript')}
+          disabled={isExecuting}
           className="gap-2"
         >
           <Play className="w-4 h-4" />

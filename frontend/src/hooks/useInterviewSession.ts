@@ -8,23 +8,24 @@ interface SessionState {
   connectedUsers: number;
 }
 
-const API_Base = 'http://localhost:8000';
+const API_Base = 'http://127.0.0.1:8000';
 
 export const useInterviewSession = (sessionId: string) => {
   const queryClient = useQueryClient();
   const userIdRef = useRef<string>(Math.random().toString(36).substring(7));
+
+  // Local state for optimistic UI and to prevent flickers during polling
+  const [localCode, setLocalCode] = useState<string | null>(null);
+  const [localLanguage, setLocalLanguage] = useState<SupportedLanguage | null>(null);
 
   // Fetch session state from backend
   const { data: session, isLoading, isError } = useQuery({
     queryKey: ['session', sessionId],
     queryFn: async (): Promise<SessionState> => {
       const response = await fetch(`${API_Base}/sessions/${sessionId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch session');
-      }
+      if (!response.ok) throw new Error('Failed to fetch session');
       return response.json();
     },
-    // Poll every 2 seconds to simulate real-time
     refetchInterval: 2000,
   });
 
@@ -33,48 +34,40 @@ export const useInterviewSession = (sessionId: string) => {
     mutationFn: async (update: Partial<SessionState>) => {
       const response = await fetch(`${API_Base}/sessions/${sessionId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(update),
       });
-      if (!response.ok) {
-        throw new Error('Failed to update session');
-      }
+      if (!response.ok) throw new Error('Failed to update');
       return response.json();
     },
     onSuccess: (updatedSession) => {
-      // Optimistically update cache or just invalidate
       queryClient.setQueryData(['session', sessionId], updatedSession);
     },
   });
 
   const updateCode = (newCode: string) => {
-    // Debouncing could be added here to avoid spamming the server
+    setLocalCode(newCode); // Update UI immediately
     updateSessionMutation.mutate({ code: newCode });
   };
 
   const updateLanguage = (newLanguage: SupportedLanguage) => {
-    // When changing language, we might want to reset code to default if needed
-    // or keep it. The backend currently trusts the payload.
-    // Let's send the default code for the new language too, matching previous logic.
+    const defaultCode = DEFAULT_CODE[newLanguage];
+    setLocalLanguage(newLanguage); // Update UI immediately
+    setLocalCode(defaultCode);
     updateSessionMutation.mutate({
       language: newLanguage,
-      code: DEFAULT_CODE[newLanguage]
+      code: defaultCode
     });
   };
 
-  // Fallback state while loading or on error
-  const currentState: SessionState = session || {
-    code: DEFAULT_CODE.javascript,
-    language: 'javascript',
-    connectedUsers: 0,
-  };
+  // Determine which values to show
+  const code = localCode !== null ? localCode : (session?.code || DEFAULT_CODE.javascript);
+  const language = localLanguage !== null ? localLanguage : (session?.language || 'javascript');
 
   return {
-    code: currentState.code,
-    language: currentState.language,
-    connectedUsers: currentState.connectedUsers,
+    code,
+    language,
+    connectedUsers: session?.connectedUsers || 0,
     isConnected: !isLoading && !isError,
     updateCode,
     updateLanguage,
