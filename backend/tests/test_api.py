@@ -3,11 +3,12 @@ from ..main import app, db
 
 client = TestClient(app)
 
+from ..database import Base, engine
+
 def teardown_function():
-    # Clear the mock DB between tests if needed, though they mostly work independently
-    # Accessing private _store for resetting in tests is acceptable for now
-    from ..database import _store
-    _store.clear()
+    # Drop and recreate tables to ensure a clean state for each test
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
 def test_health_check():
     response = client.get("/health")
