@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -138,9 +138,9 @@ const Signup = () => {
 
                     <div className="text-center mt-6 text-sm text-muted-foreground">
                         Already have an account?{" "}
-                        <a href="/login" className="text-primary hover:underline font-medium">
+                        <Link to="/login" className="text-primary hover:underline font-medium">
                             Sign in
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>
