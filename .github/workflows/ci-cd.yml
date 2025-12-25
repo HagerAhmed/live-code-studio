@@ -60,7 +60,17 @@ jobs:
           deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
           if [ -z "$deploy_url" ]; then
-            echo "Error: RENDER_DEPLOY_HOOK secret is not set!"
+            echo "::error::RENDER_DEPLOY_HOOK secret is not set! Go to Settings -> Secrets."
             exit 1
           fi
-          curl "$deploy_url"
+          
+          echo "Triggering deployment..."
+          # -f fails on HTTP errors (4xx, 5xx), -s silent, -S show error, -w display status code
+          status_code=$(curl -f -s -S -w "%{http_code}" "$deploy_url")
+          
+          if [ "$status_code" -ne 200 ]; then
+             echo "::error::Deployment failed with status code: $status_code"
+             exit 1
+          fi
+          
+          echo "Deployment triggered successfully! (Status: $status_code)"
