@@ -34,12 +34,26 @@ A real-time collaborative coding interview platform.
 
 ## Deployment (Render)
 
-This project is configured for one-click deployment on [Render](https://render.com).
+This project is configured for one-click deployment on [Render](https://render.com) and continuous deployment via GitHub Actions.
 
 1.  **Push to GitHub**.
 2.  **Create Blueprint** in Render dashboard.
 3.  Connect your repository.
 4.  Render will auto-detect `render.yaml` and deploy.
+
+### CI/CD Pipeline
+
+A GitHub Actions workflow (`.github/workflows/ci-cd.yml`) is configured to:
+1.  Run Backend Tests (`pytest`).
+2.  Build Frontend (Type check & compile).
+3.  **Automatically Deploy** to Render if tests pass (Main branch only).
+
+**Setup Required**:
+To enable auto-deployment from the pipeline, adding a secret to your GitHub Repo is required:
+1.  Go to Render -> Service Settings -> **Deploy Hook**.
+2.  Copy the URL.
+3.  Go to GitHub -> Settings -> Secrets -> Actions -> New Repository Secret.
+4.  Name: `RENDER_DEPLOY_HOOK`, Value: `(Your Render URL)`.
 
 ## Project Structure
 
