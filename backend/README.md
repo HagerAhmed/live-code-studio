@@ -12,7 +12,14 @@ This is the backend API for Live Code Studio, built with **Python 3.12+** and **
 
 *   **Python**: Version 3.12 or higher.
 *   **uv**: A fast Python package manager. Install it via `pip install uv` or see [uv docs](https://docs.astral.sh/uv/).
-*   **Node.js**: Required if you want to execute JavaScript/TypeScript code via the backend.
+*   **Node.js**: Required for JavaScript/TypeScript.
+*   **Compilers/Runtimes** (for polyglot support):
+    *   **Java**: JDK (javac, java)
+    *   **C++**: G++ (MinGW on Windows)
+    *   **C#**: .NET SDK (dotnet)
+    *   **Go**: Go Runtime (go)
+    *   **Rust**: Rust Toolchain (rustc)
+    *   **TypeScript**: `ts-node` (install via `npm install -g ts-node typescript`)
 
 ## Installation
 
