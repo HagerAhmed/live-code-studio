@@ -39,13 +39,14 @@ console.log(solution("Hello, World!"));
   typescript: `// Welcome to your coding interview!
 // Write your solution below
 
-function solution(input: string): string {
-  // Your code here
-  return input;
+const user = {
+  firstName: "Angela",
+  lastName: "Davis",
+  role: "Professor",
 }
+ 
+console.log(user.firstName)
 
-// Test your solution
-console.log(solution("Hello, World!"));
 `,
   python: `# Welcome to your coding interview!
 # Write your solution below
