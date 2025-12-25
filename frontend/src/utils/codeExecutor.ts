@@ -5,109 +5,106 @@ export interface ExecutionResult {
   executionTime: number;
 }
 
+declare global {
+  interface Window {
+    loadPyodide: (config: { indexURL: string }) => Promise<any>;
+    pyodide: any;
+  }
+}
+
+let pyodideReadyPromise: Promise<any> | null = null;
+
+const getPyodide = async () => {
+  if (!pyodideReadyPromise) {
+    pyodideReadyPromise = window.loadPyodide({
+      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
+    });
+  }
+  return pyodideReadyPromise;
+};
+
 export const executeCode = async (code: string, language: string): Promise<ExecutionResult> => {
   const startTime = performance.now();
 
-  // JavaScript/TypeScript: Execute in browser
-  if (language === 'javascript' || language === 'typescript') {
-    try {
-      // Capture console.log outputs
+  try {
+    // JavaScript/TypeScript: Execute in browser (Native V8)
+    if (language === 'javascript' || language === 'typescript') {
+      // Capture console.log
       const logs: string[] = [];
       const originalLog = console.log;
       const originalError = console.error;
-      const originalWarn = console.warn;
 
-      console.log = (...args) => {
-        logs.push(args.map(arg =>
-          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-        ).join(' '));
-      };
-      console.error = (...args) => {
-        logs.push(`[ERROR] ${args.map(arg =>
-          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-        ).join(' ')}`);
-      };
-      console.warn = (...args) => {
-        logs.push(`[WARN] ${args.map(arg =>
-          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-        ).join(' ')}`);
-      };
+      console.log = (...args) => logs.push(args.map(a =>
+        typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
+      ).join(' '));
 
-      // Create a sandboxed execution environment
-      const sandbox = new Function(`
-        'use strict';
-        ${code}
-      `);
+      console.error = (...args) => logs.push(`[Error] ${args.map(a => String(a)).join(' ')}`);
 
-      // Execute with timeout
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Execution timed out (5s limit)')), 5000);
-      });
-
-      const executionPromise = new Promise<void>((resolve, reject) => {
-        try {
-          sandbox();
-          resolve();
-        } catch (e) {
-          reject(e);
-        }
-      });
-
-      await Promise.race([executionPromise, timeoutPromise]);
-
-      // Restore console
-      console.log = originalLog;
-      console.error = originalError;
-      console.warn = originalWarn;
-
-      const endTime = performance.now();
+      try {
+        // Simple sandbox
+        const sandbox = new Function(`"use strict";\n${code}`);
+        sandbox();
+      } catch (e) {
+        throw e;
+      } finally {
+        console.log = originalLog;
+        console.error = originalError;
+      }
 
       return {
         success: true,
         output: logs.join('\n') || 'Code executed successfully (no output)',
-        executionTime: Math.round(endTime - startTime),
-      };
-    } catch (error) {
-      const endTime = performance.now();
-      return {
-        success: false,
-        output: '',
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        executionTime: Math.round(endTime - startTime),
+        executionTime: Math.round(performance.now() - startTime),
       };
     }
-  }
 
-  // Other languages: Call backend API
-  try {
-    const response = await fetch('http://localhost:8000/execute', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ code, language }),
-    });
+    // Python: Execute in browser (WASM/Pyodide)
+    if (language === 'python') {
+      const pyodide = await getPyodide();
 
-    if (!response.ok) {
-      // If backend returns a structured error, try to use it
-      const result = await response.json().catch(() => null);
-      throw new Error(result?.error || `Execution failed with status: ${response.status}`);
+      // Redirect stdout to capture print statements
+      pyodide.runPython(`
+import sys
+import io
+sys.stdout = io.StringIO()
+sys.stderr = io.StringIO()
+      `);
+
+      try {
+        await pyodide.runPythonAsync(code);
+        const stdout = pyodide.runPython("sys.stdout.getvalue()");
+        const stderr = pyodide.runPython("sys.stderr.getvalue()");
+
+        return {
+          success: true,
+          output: (stdout + stderr).trim() || 'Code executed successfully (no output)',
+          executionTime: Math.round(performance.now() - startTime),
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          output: '',
+          error: String(err),
+          executionTime: Math.round(performance.now() - startTime),
+        };
+      }
     }
 
-    const result = await response.json();
-    return {
-      success: result.success,
-      output: result.output,
-      error: result.error,
-      executionTime: result.executionTime,
-    };
-  } catch (error) {
-    const endTime = performance.now();
+    // Other languages: Stub
     return {
       success: false,
       output: '',
-      error: `Backend connection failed: ${error instanceof Error ? error.message : 'Unknown error'}. Ensure the backend is running on port 8000.`,
-      executionTime: Math.round(endTime - startTime),
+      error: `Browser execution for ${language} is not supported. Only JavaScript and Python (WASM) are supported in this mode.`,
+      executionTime: 0
+    };
+
+  } catch (error) {
+    return {
+      success: false,
+      output: '',
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      executionTime: Math.round(performance.now() - startTime),
     };
   }
 };
+
