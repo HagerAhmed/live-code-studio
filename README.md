@@ -4,8 +4,7 @@ A real-time collaborative coding interview platform.
 
 ## 📺 Demo
 
-[![Live Code Studio Demo](https://img.youtube.com/vi/v1tDwAtJLZ0/0.jpg)]([https://www.youtube.com/watch?v=v1tDwAtJLZ0](https://youtu.be/LwYSVOlIto8))
-
+[![Live Code Studio Demo](https://img.youtube.com/vi/LwYSVOlIto8/0.jpg)](https://www.youtube.com/watch?v=LwYSVOlIto8)
 
 ## Features
 
